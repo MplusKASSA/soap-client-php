@@ -8,5 +8,6 @@
         "psr-4": {
             "Mpluskassa\\ApiClient\\": "/src"
         }
-    }
+    },
+    "minimum-stability": "dev"
 }

@@ -1,8 +1,8 @@
 <?php
  namespace Mpluskassa\ApiClient;
  
-class ApiClient {
+class Client {
     public function __construct() {
-        echo "Hallo wereld...";
+        echo "Hallo wereld...2232";
     }
 }
