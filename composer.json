@@ -1,0 +1,12 @@
+{
+    "name": "mpluskassa/api-client",
+    "description": "MplusKASSA api client PHP",
+    "require": {
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mpluskassa\\ApiClient\\": "/src"
+        }
+    }
+}
