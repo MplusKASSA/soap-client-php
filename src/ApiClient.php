@@ -6,7 +6,6 @@ use GuzzleHttp\Client;
 use SimpleXMLElement;
 use DOMDocument;
 use DOMElement;
-use DOMAttr;
 
 class ApiClient {
 
@@ -14,6 +13,8 @@ class ApiClient {
 
     private Client $client;
     private float $duration = 0;
+    private string $lastRequestXML;
+    private string $lastResponseXML;
 
     public function __construct(string $apiServer, int $apiPort, string $ident, string $secret) {
         $this->client = new Client([
@@ -30,19 +31,21 @@ class ApiClient {
         ]);
     }
 
-    public function execute(string $method, ?object $requestObject = null): SimpleXMLElement {
+    public function execute(string $method, string $responseObjectName, ?object $requestObject = null): SimpleXMLElement {
+        $this->lastRequestXML = "";
+        $this->lastResponseXML = "";
         $startTime = microtime(true);
         $requestXML = $this->createXML($method, $requestObject);
-        die(var_export($requestXML, true));
+        $this->lastRequestXML = $requestXML;
         try {
             $response = $this->client->post("/", ['body' => $requestXML]);
             if (($responseCode = $response->getStatusCode()) === 200) {
                 $responseXML = $response->getBody()->getContents();
-                echo "Response xml : " . $responseXML;
+                $this->lastResponseXML = $responseXML;
                 if (($parsedXML = simplexml_load_string($responseXML)) === false) {
                     throw new \Exception("Could not parse XML");
                 }
-                if (is_array($returnValue = $parsedXML->xpath(sprintf('//ns:%sResponse', ucfirst($method)))) && count($returnValue) && is_object(reset($returnValue))) {
+                if (is_array($returnValue = $parsedXML->xpath(sprintf('//ns:%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
                     $this->duration = microtime(true) - $startTime;
                     return reset($returnValue);
                 }
@@ -51,8 +54,16 @@ class ApiClient {
                 throw new \Exception("Received a HTTP Code : " . $responseCode);
             }
         } catch (\Exception $e) {
-            throw new Exception('Exception:' . $e->getMessage());
+            throw new \Exception('Exception:' . $e->getMessage());
         }
+    }
+
+    public function getLastRequestXML() {
+        return $this->lastRequestXML;
+    }
+
+    public function getLastResponseXML() {
+        return $this->lastResponseXML;
     }
 
     public function getLastCallDurationInSeconds(): float {
@@ -81,19 +92,28 @@ class ApiClient {
 
     private function addRequestObject(DOMDocument &$dom, DOMElement &$methodElement, $requestObject): void {
         if ($requestObject !== null) {
-//            die(print_r($requestObject, true));
-            if(is_array($requestObject)) {
-                foreach($requestObject as $key => $requestObjectItem) {
+            if (is_array($requestObject)) {
+                foreach ($requestObject as $key => $requestObjectItem) {
                     $this->addRequestObject($dom, $methodElement, $requestObject[$key]);
                 }
-            } elseif(is_object($requestObject)) {
-                foreach($requestObject as $key => $value) {
-                    $requestElement = $dom->createElement($key);
-                    $methodElement->appendChild($requestElement);
-                    if(is_array($value) || is_object($value)) {
+            } elseif (is_object($requestObject)) {
+                foreach ($requestObject as $key => $value) {
+                    if ((is_array($value) && count($value) && is_object(reset($value))) || is_object($value)) {
+                        $requestElement = $dom->createElement($key);
+                        $methodElement->appendChild($requestElement);
                         $this->addRequestObject($dom, $requestElement, $value);
                     } else {
-                        
+                        if (is_array($value)) {
+                            foreach ($value as $itemValue) {
+                                $requestElement = $dom->createElement($key);
+                                $methodElement->appendChild($requestElement);
+                                $requestElement->nodeValue = $itemValue;
+                            }
+                        } else {
+                            $requestElement = $dom->createElement($key);
+                            $methodElement->appendChild($requestElement);
+                            $requestElement->nodeValue = $value;
+                        }
                     }
                 }
             }
