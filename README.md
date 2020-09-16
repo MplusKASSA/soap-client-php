@@ -42,7 +42,7 @@ try {
     }
     echo sprintf("Duration : %.1f seconds\n", $client->getLastCallDurationInSeconds());             // <-- retrieve last call duration
 } catch (\Exception $e) {
-    echo "Exception : " . $e->getMessage() . "\n";                              // <-- get exception messag
+    echo "Exception : " . $e->getMessage() . "\n";                              // <-- get exception message
     echo "Request :\n" . $client->getLastRequestXML() . "\n";           // <-- get last request XML
     echo "Response :\n" . $client->getLastResponseXML() . "\n";     // <-- get last response XML
 }
