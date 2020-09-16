@@ -32,10 +32,9 @@ $requestObj = (object) [                 // Build the request object as document
             ]
 ];
 $method = "getArticleGroupChanges";                                     // <-- This is the api method, get from documentation after "Input:" for the api method
-$responseObjectName = "GetArticleGroupChangesResponse"; // <-- This is the response name, get from the documentation after "Output:" for the api method
 
 try {
-    $response = $client->execute($method, $responseObjectName, $requestObj);    // <-- execute the request
+    $response = $client->execute($method, $requestObj);    // <-- execute the request
     print_r($response);
     foreach($response->changedArticleGroupList->changedArticleGroups as $articleGroup) {    // <-- access the response as an object
         print_r($articleGroup->name);

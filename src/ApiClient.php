@@ -31,7 +31,7 @@ class ApiClient {
         ]);
     }
 
-    public function execute(string $method, string $responseObjectName, ?object $requestObject = null): SimpleXMLElement {
+    public function execute(string $method, ?object $requestObject = null): SimpleXMLElement {
         $this->lastRequestXML = "";
         $this->lastResponseXML = "";
         $startTime = microtime(true);
@@ -41,11 +41,14 @@ class ApiClient {
             $response = $this->client->post("/", ['body' => $requestXML]);
             if (($responseCode = $response->getStatusCode()) === 200) {
                 $responseXML = $response->getBody()->getContents();
+                if(empty($responseObjectName = $this->getResponseObjectName($responseXML))) {
+                    throw new \Exception("Could not find response object");
+                }
                 $this->lastResponseXML = $responseXML;
                 if (($parsedXML = simplexml_load_string($responseXML)) === false) {
                     throw new \Exception("Could not parse XML");
                 }
-                if (is_array($returnValue = $parsedXML->xpath(sprintf('//ns:%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
+                if (is_array($returnValue = $parsedXML->xpath(sprintf('//%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
                     $this->duration = microtime(true) - $startTime;
                     return reset($returnValue);
                 }
@@ -118,6 +121,19 @@ class ApiClient {
                 }
             }
         }
+    }
+
+    private function getResponseObjectName(string $xml): string {
+       if (($startPos = strpos($xml, "SOAP-ENV:Body")) === false) {
+            return "";
+        }
+        if (($startPos = strpos($xml, "ns:", $startPos)) === false) {
+            return "";
+        }
+        if (($endPos = strpos($xml, ">", $startPos)) === false) {
+            return "";
+        }
+        return substr($xml, $startPos, $endPos - $startPos);
     }
 
 }
