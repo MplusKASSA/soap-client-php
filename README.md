@@ -1,10 +1,14 @@
-Mplus api client PHP
+# Mplus api client PHP
+
+---
 
 This api client is intended to be lightweight and fast so no wrappers, wsdl or soapclient is used.
 Use your api documentation for reference : https://api.mpluskassa.nl:YOUR_API_PORT/?docs
 
-Usage :
+---
 
+Usage :
+```
 <?php
 $apiServer = "https://ap.mpluskassa.nl";
 $apiPort = YOUR_API_PORT;
@@ -42,3 +46,4 @@ try {
     echo "Request :\n" . $client->getLastRequestXML() . "\n";           // <-- get last request XML
     echo "Response :\n" . $client->getLastResponseXML() . "\n";     // <-- get last response XML
 }
+```
