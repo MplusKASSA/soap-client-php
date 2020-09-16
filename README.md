@@ -10,7 +10,7 @@ Use your api documentation for reference : https://api.mpluskassa.nl:YOUR_API_PO
 Usage :
 ```
 <?php
-$apiServer = "https://ap.mpluskassa.nl";
+$apiServer = "https://api.mpluskassa.nl";
 $apiPort = YOUR_API_PORT;
 $apiIdent = YOUR_API_IDENT;
 $apiSecret = YOUR_API_SECRET;
