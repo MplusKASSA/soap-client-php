@@ -10,6 +10,9 @@ Use your api documentation for reference : https://api.mpluskassa.nl:YOUR_API_PO
 Usage :
 ```
 <?php
+use Mpluskassa\ApiClient\ApiClient;
+use Mpluskassa\ApiClient\ApiException;
+
 $apiServer = "https://api.mpluskassa.nl";
 $apiPort = YOUR_API_PORT;
 $apiIdent = YOUR_API_IDENT;
@@ -40,9 +43,12 @@ try {
         print_r($articleGroup->name);
     }
     echo sprintf("Duration : %.1f seconds\n", $client->getLastCallDurationInSeconds());             // <-- retrieve last call duration
-} catch (\Exception $e) {
-    echo "Exception : " . $e->getMessage() . "\n";                              // <-- get exception message
-    echo "Request :\n" . $client->getLastRequestXML() . "\n";           // <-- get last request XML
-    echo "Response :\n" . $client->getLastResponseXML() . "\n";     // <-- get last response XML
+} catch (ApiException $e) {
+    echo "Exception : " . $e->getMessage() . "\n";                             // <-- get exception message
+    echo "Code : ".$e->getCode()."\n";                                              // <-- get last exception code
+    echo "Trace : ".print_r($e->getTrace(), true)."\n";                        //<-- get backtrace
+    echo "RequestId : ".$e->getRequestId()."\n";                                //<-- get request id
+    echo "Request :\n" . $client->getLastRequestXML() . "\n";            // <-- get last request XML
+    echo "Response :\n" . $client->getLastResponseXML() . "\n";       // <-- get last response XML
 }
 ```
