@@ -3,9 +3,9 @@
 namespace Mpluskassa\ApiClient;
 
 use GuzzleHttp\Client;
-use SimpleXMLElement;
 use DOMDocument;
 use DOMElement;
+use Mpluskassa\ApiClient\ApiException;
 
 class ApiClient {
 
@@ -42,22 +42,22 @@ class ApiClient {
             if (($responseCode = $response->getStatusCode()) === 200) {
                 $responseXML = $response->getBody()->getContents();
                 if (empty($responseObjectName = $this->getResponseObjectName($responseXML))) {
-                    throw new \Exception("Could not find response object");
+                    throw new Exception("Could not find response object");
                 }
                 $this->lastResponseXML = $responseXML;
                 if (($parsedXML = simplexml_load_string($responseXML)) === false) {
-                    throw new \Exception("Could not parse XML");
+                    throw new Exception("Could not parse XML");
                 }
                 if (is_array($returnValue = $parsedXML->xpath(sprintf('//%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
                     $this->duration = microtime(true) - $startTime;
                     return json_decode(json_encode(reset($returnValue)));
                 }
-                throw new \Exception("No valid response");
+                throw new Exception("No valid response");
             } else {
-                throw new \Exception("Received a HTTP Code : " . $responseCode);
+                throw new Exception("Received a HTTP Code : " . $responseCode);
             }
         } catch (\Exception $e) {
-            throw new \Exception('Exception:' . $e->getMessage());
+            throw new ApiException('Exception:' . $e->getMessage());
         }
     }
 
