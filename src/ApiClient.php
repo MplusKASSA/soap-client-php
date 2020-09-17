@@ -15,15 +15,11 @@ class ApiClient {
     private float $duration = 0;
     private string $lastRequestXML;
     private string $lastResponseXML;
+    private string $requestId;
 
     public function __construct(string $apiServer, int $apiPort, string $ident, string $secret) {
         $this->client = new Client([
             'base_uri' => sprintf("%s:%u", $apiServer, $apiPort),
-            'headers' => [
-                'User-Agent' => sprintf("%s %s", __CLASS__, self::VERSION),
-                'Content-Type' => 'text/xml; charset=utf-8',
-                'SOAPAction' => ''
-            ],
             'query' => [
                 'ident' => $ident,
                 'secret' => $secret
@@ -31,33 +27,33 @@ class ApiClient {
         ]);
     }
 
-    public function execute(string $method, ?object $requestObject = null): object {
+    public function execute(string $method, ?object $requestObject = null, ?string $requestId = null): object {
         $this->lastRequestXML = "";
         $this->lastResponseXML = "";
         $startTime = microtime(true);
         $requestXML = $this->createXML($method, $requestObject);
         $this->lastRequestXML = $requestXML;
         try {
-            $response = $this->client->post("/", ['body' => $requestXML]);
+            $response = $this->client->post("/", ['body' => $requestXML, 'headers' => $this->buildRequestHeaders($method, $requestId)]);
             if (($responseCode = $response->getStatusCode()) === 200) {
                 $responseXML = $response->getBody()->getContents();
                 if (empty($responseObjectName = $this->getResponseObjectName($responseXML))) {
-                    throw new Exception("Could not find response object");
+                    throw new Exception("Could not find response object", 1000);
                 }
                 $this->lastResponseXML = $responseXML;
                 if (($parsedXML = simplexml_load_string($responseXML)) === false) {
-                    throw new Exception("Could not parse XML");
+                    throw new Exception("Could not parse XML", 2000);
                 }
                 if (is_array($returnValue = $parsedXML->xpath(sprintf('//%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
                     $this->duration = microtime(true) - $startTime;
                     return json_decode(json_encode(reset($returnValue)));
                 }
-                throw new Exception("No valid response");
+                throw new Exception("No valid response", 3000);
             } else {
-                throw new Exception("Received a HTTP Code : " . $responseCode);
+                throw new Exception("Received a HTTP Code : " . $responseCode, 4000);
             }
         } catch (\Exception $e) {
-            throw new ApiException('Exception:' . $e->getMessage());
+            throw new ApiException($e->getMessage(), $e->getCode(), $e->getPrevious(), $this->getLastRequestId());
         }
     }
 
@@ -71,6 +67,20 @@ class ApiClient {
 
     public function getLastCallDurationInSeconds(): float {
         return round($this->duration, 1);
+    }
+
+    public function getLastRequestId(): string {
+        return $this->requestId;
+    }
+
+    private function buildRequestHeaders(string $method, ?string $requestId = null): array {
+        $this->requestId = $requestId ?? uniqid("mpac_");
+        return [
+            'User-Agent' => sprintf("%s %s", __CLASS__, self::VERSION),
+            'Content-Type' => 'text/xml; charset=utf-8',
+            'SOAPAction' => $method,
+            'X-Request-Id' => $this->requestId,
+        ];
     }
 
     private function createXML(string $method, ?object $requestObject): string {
