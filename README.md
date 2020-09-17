@@ -20,9 +20,9 @@ $apiSecret = YOUR_API_SECRET;
 
 $client = new ApiClient($apiServer, $apiPort, $apiIdent, $apiSecret);
 
-$requestObj = (object) [                 // Build the request object as documented in the documentation for the api method
+$requestArray = [                 // Build the request object as documented in the documentation for the api method
             'request' => [
-                (object) [
+                 [
                     'syncMarker' => 0,
                     'syncMarkerLimit' => 10,
                     'groupNumbers' => [
@@ -37,7 +37,7 @@ $requestObj = (object) [                 // Build the request object as document
 $method = "getArticleGroupChanges";                                     // <-- This is the api method, get from documentation after "Input:" for the api method
 
 try {
-    $response = $client->execute($method, $requestObj);    // <-- execute the request
+    $response = $client->execute($method, $requestArray);    // <-- execute the request
     print_r($response);
     foreach($response->changedArticleGroupList->changedArticleGroups as $articleGroup) {    // <-- access the response as an object
         print_r($articleGroup->name);

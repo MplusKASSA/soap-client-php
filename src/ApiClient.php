@@ -27,11 +27,11 @@ class ApiClient {
         ]);
     }
 
-    public function execute(string $method, ?object $requestObject = null, ?string $requestId = null): object {
+    public function execute(string $method, ?array $requestArray = null, ?string $requestId = null): object {
         $this->lastRequestXML = "";
         $this->lastResponseXML = "";
         $startTime = microtime(true);
-        $requestXML = $this->createXML($method, $requestObject);
+        $requestXML = $this->createXML($method, $requestArray);
         $this->lastRequestXML = $requestXML;
         try {
             $response = $this->client->post("/", ['body' => $requestXML, 'headers' => $this->buildRequestHeaders($method, $requestId)]);
@@ -83,7 +83,7 @@ class ApiClient {
         ];
     }
 
-    private function createXML(string $method, ?object $requestObject): string {
+    private function createXML(string $method, ?array $requestArray): string {
         $dom = new DOMDocument();
         $dom->encoding = 'utf-8';
         $dom->xmlVersion = '1.0';
@@ -96,36 +96,38 @@ class ApiClient {
         $soapEnv->setAttribute('xmlns:ns1', 'urn:mplusqapi');
         $soapBody = $dom->createElement("SOAP-ENV:Body");
         $methodElement = $dom->createElement(sprintf("ns1:%s", $method));
-        $this->addRequestObject($dom, $methodElement, $requestObject);
+        $this->addRequestArray($dom, $methodElement, $requestArray);
         $soapBody->appendChild($methodElement);
         $soapEnv->appendChild($soapBody);
         $dom->appendChild($soapEnv);
         return $dom->saveXML();
     }
 
-    private function addRequestObject(DOMDocument &$dom, DOMElement &$methodElement, $requestObject): void {
-        if ($requestObject !== null) {
-            if (is_array($requestObject)) {
-                foreach ($requestObject as $key => $requestObjectItem) {
-                    $this->addRequestObject($dom, $methodElement, $requestObject[$key]);
-                }
-            } elseif (is_object($requestObject)) {
-                foreach ($requestObject as $key => $value) {
-                    if ((is_array($value) && count($value) && is_object(reset($value))) || is_object($value)) {
-                        $requestElement = $dom->createElement($key);
-                        $methodElement->appendChild($requestElement);
-                        $this->addRequestObject($dom, $requestElement, $value);
-                    } else {
-                        if (is_array($value)) {
-                            foreach ($value as $itemValue) {
-                                $requestElement = $dom->createElement($key);
-                                $methodElement->appendChild($requestElement);
-                                $requestElement->nodeValue = $itemValue;
-                            }
-                        } else {
+    private function addRequestArray(DOMDocument &$dom, DOMElement &$methodElement, $requestArray): void {
+        if ($requestArray !== null) {
+            if (is_array($requestArray)) {
+                if (!is_string(array_key_first($requestArray))) {
+                    foreach ($requestArray as $key => $requestArrayItem) {
+                        $this->addRequestArray($dom, $methodElement, $requestArray[$key]);
+                    }
+                } else {
+                    foreach ($requestArray as $key => $value) {
+                        if (is_array($value) && (is_array(reset($value)) && is_string(array_key_first(reset($value))) || is_string(array_key_first($value)))) {
                             $requestElement = $dom->createElement($key);
                             $methodElement->appendChild($requestElement);
-                            $requestElement->nodeValue = $value;
+                            $this->addRequestArray($dom, $requestElement, $value);
+                        } else {
+                            if (is_array($value)) {
+                                foreach ($value as $itemValue) {
+                                    $requestElement = $dom->createElement($key);
+                                    $methodElement->appendChild($requestElement);
+                                    $requestElement->nodeValue = $itemValue;
+                                }
+                            } else {
+                                $requestElement = $dom->createElement($key);
+                                $methodElement->appendChild($requestElement);
+                                $requestElement->nodeValue = $value;
+                            }
                         }
                     }
                 }
