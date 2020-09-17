@@ -27,7 +27,7 @@ class ApiClient {
         ]);
     }
 
-    public function execute(string $method, ?array $requestArray = null, ?string $requestId = null): object {
+    public function execute(string $method, ?array $requestArray = null, ?string $requestId = null): array {
         $this->lastRequestXML = "";
         $this->lastResponseXML = "";
         $startTime = microtime(true);
@@ -46,7 +46,7 @@ class ApiClient {
                 }
                 if (is_array($returnValue = $parsedXML->xpath(sprintf('//%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
                     $this->duration = microtime(true) - $startTime;
-                    return json_decode(json_encode(reset($returnValue)));
+                    return json_decode(json_encode(reset($returnValue)), true);
                 }
                 throw new Exception("No valid response", 3000);
             } else {
