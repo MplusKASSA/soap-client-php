@@ -53,7 +53,7 @@ class ApiClient {
                 throw new Exception("Received a HTTP Code : " . $responseCode, 4000);
             }
         } catch (\Exception $e) {
-            throw new ApiException($e->getMessage(), $e->getCode(), $e->getPrevious(), $this->getLastRequestId());
+            throw new ApiException($e->getMessage(), $e->getCode(), $e, $this->getLastRequestId());
         }
     }
 
