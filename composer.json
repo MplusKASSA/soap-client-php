@@ -1,6 +1,7 @@
 {
     "name": "mpluskassa/api-client",
-    "description": "MplusKASSA api client PHP",
+    "description": "PHP Client for the MplusKASSA SOAP API",
+    "license": "MIT",
     "require": {
         "guzzlehttp/guzzle": "^6.5"
     },
@@ -9,5 +10,6 @@
             "Mpluskassa\\ApiClient\\": "/src"
         }
     },
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
