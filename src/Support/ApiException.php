@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpluskassa\Soap;
+namespace Mpluskassa\Support;
 
 class ApiException extends \Exception {
     private string $requestId;
