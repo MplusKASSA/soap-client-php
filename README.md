@@ -21,27 +21,23 @@ $apiSecret = YOUR_API_SECRET;
 
 $client = new Client($apiServer, $apiPort, $apiIdent, $apiSecret);
 
-$soapAction = "getArticleGroupChanges"; // <-- This is the API method, get this from documentation after "Input:" for the desired call
+$apiMethod = "getArticleGroupChanges"; // <-- This is the API method, get this from documentation after "Input:" for the desired call
 
 // Build the request object as documented in your personal documentation for the specific API method
-$requestArray = [ 
-            'request' => [
-                 [
-                    'syncMarker' => 0,
-                    'syncMarkerLimit' => 10,
-                    'groupNumbers' => [
-                        1,
-                        2,
-                        3,
-                        9,
-                    ]
-                ]
+$requestArray = [
+    'request' => [
+        [
+            'syncMarker' => 0,
+            'syncMarkerLimit' => 10,
+            'groupNumbers' => [
+                1, 2, 3, 9,
             ]
+        ]
+    ]
 ];
 
-
 try {
-    $response = $client->execute($soapAction, $requestArray); // <-- execute the request
+    $response = $client->execute($apiMethod, $requestArray); // <-- execute the request
     print_r($response);
     foreach($response->changedArticleGroupList->changedArticleGroups as $articleGroup) { // <-- access the response as an object
         print_r($articleGroup->name);
