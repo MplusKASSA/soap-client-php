@@ -10,12 +10,16 @@ use Mpluskassa\Support\ApiException;
 class Client {
 
     private const VERSION = "1.0.0";
+    private const DEFAULT_CONNECT_TIMEOUT_SECS = 30;
+    private const DEFAULT_TIMEOUT_SECS = 600;
 
     private HttpClient $client;
     private float $duration = 0;
     private string $lastRequestXML;
     private string $lastResponseXML;
     private string $requestId;
+    private float $connectTimeout;
+    private float $timeout;
 
     public function __construct(string $apiServer, int $apiPort, string $ident, string $secret) {
         $this->client = new HttpClient([
@@ -23,8 +27,10 @@ class Client {
             'query' => [
                 'ident' => $ident,
                 'secret' => $secret
-            ]
+            ],
         ]);
+        $this->connectTimeout = self::DEFAULT_CONNECT_TIMEOUT_SECS;
+        $this->timeout = self::DEFAULT_TIMEOUT_SECS;
     }
 
     public function execute(string $method, ?array $requestArray = null, ?string $requestId = null): object {
@@ -34,7 +40,12 @@ class Client {
         $requestXML = $this->createXML($method, $requestArray);
         $this->lastRequestXML = $requestXML;
         try {
-            $response = $this->client->post("/", ['body' => $requestXML, 'headers' => $this->buildRequestHeaders($method, $requestId)]);
+            $response = $this->client->post("/", [
+                'body' => $requestXML,
+                'headers' => $this->buildRequestHeaders($method, $requestId),
+                'connect_timeout' => $this->connectTimeout,
+                'timeout' => $this->timeout,
+            ]);
             if (($responseCode = $response->getStatusCode()) === 200) {
                 $responseXML = $response->getBody()->getContents();
                 if (empty($responseObjectName = $this->getResponseObjectName($responseXML))) {
@@ -71,6 +82,14 @@ class Client {
 
     public function getLastRequestId(): string {
         return $this->requestId;
+    }
+
+    public function setConnectTimeout(float $connectTimoutInSeconds) {
+        $this->connectTimeout = $connectTimoutInSeconds;
+    }
+
+    public function setTimeout(float $timeoutInSeconds) {
+        $this->timeout = $timeoutInSeconds;
     }
 
     private function buildRequestHeaders(string $method, ?string $requestId = null): array {
