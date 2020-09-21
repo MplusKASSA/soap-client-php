@@ -1,5 +1,5 @@
 {
-    "name": "mpluskassa/api-client",
+    "name": "mpluskassa/soap",
     "description": "PHP Client for the MplusKASSA SOAP API",
     "license": "MIT",
     "require": {
@@ -7,7 +7,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Mpluskassa\\ApiClient\\": "/src"
+            "Mpluskassa\\": "/src"
         }
     },
     "minimum-stability": "dev",

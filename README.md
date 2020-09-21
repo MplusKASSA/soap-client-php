@@ -1,4 +1,4 @@
-# Mplus api client PHP
+# Mplus Soap api client PHP
 
 ---
 
@@ -10,15 +10,15 @@ Use your api documentation for reference : https://api.mpluskassa.nl:YOUR_API_PO
 Usage :
 ```
 <?php
-use Mpluskassa\ApiClient\ApiClient;
-use Mpluskassa\ApiClient\ApiException;
+use Mpluskassa\Soap\Client;
+use Mpluskassa\Soap\ApiException;
 
 $apiServer = "https://api.mpluskassa.nl";
 $apiPort = YOUR_API_PORT;
 $apiIdent = YOUR_API_IDENT;
 $apiSecret = YOUR_API_SECRET;
 
-$client = new ApiClient($apiServer, $apiPort, $apiIdent, $apiSecret);
+$client = new Client($apiServer, $apiPort, $apiIdent, $apiSecret);
 
 $requestArray = [                 // Build the request object as documented in the documentation for the api method
             'request' => [

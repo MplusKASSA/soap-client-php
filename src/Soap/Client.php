@@ -1,24 +1,24 @@
 <?php
 
-namespace Mpluskassa\ApiClient;
+namespace Mpluskassa\Soap;
 
-use GuzzleHttp\Client;
+use GuzzleHttp\Client as HttpClient;
 use DOMDocument;
 use DOMElement;
-use Mpluskassa\ApiClient\ApiException;
+use Mpluskassa\Soap\ApiException;
 
-class ApiClient {
+class Client {
 
     private const VERSION = "1.0.0";
 
-    private Client $client;
+    private HttpClient $client;
     private float $duration = 0;
     private string $lastRequestXML;
     private string $lastResponseXML;
     private string $requestId;
 
     public function __construct(string $apiServer, int $apiPort, string $ident, string $secret) {
-        $this->client = new Client([
+        $this->client = new HttpClient([
             'base_uri' => sprintf("%s:%u", $apiServer, $apiPort),
             'query' => [
                 'ident' => $ident,
