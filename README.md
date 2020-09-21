@@ -2,7 +2,7 @@
 
 ---
 
-This api client is intended to be lightweight and fast so no wrappers, wsdl or soapclient is used.
+This api client is intended to be lightweight and fast so no wrappers, wsdl or soapclient is used. 
 Use your api documentation for reference : https://api.mpluskassa.nl:YOUR_API_PORT/?docs
 
 ---
