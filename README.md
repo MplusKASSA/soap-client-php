@@ -10,8 +10,8 @@ Use your api documentation for reference : https://api.mpluskassa.nl:YOUR_API_PO
 Usage :
 ```
 <?php
-use Mpluskassa\Soap\Client;
-use Mpluskassa\Support\ApiException;
+use MplusKASSA\SOAP\Client;
+use MplusKASSA\Support\ApiException;
 
 $apiServer = "https://api.mpluskassa.nl";
 $apiPort = YOUR_API_PORT;

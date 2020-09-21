@@ -1,6 +1,6 @@
 <?php
 
-namespace Mpluskassa\Soap;
+namespace MplusKASSA\SOAP;
 
 use GuzzleHttp\Client as HttpClient;
 use DOMDocument;
