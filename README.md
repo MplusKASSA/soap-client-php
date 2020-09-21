@@ -1,4 +1,4 @@
-# Mplus Soap api client PHP
+# MplusKASSA SOAP API Client PHP
 
 ---
 
