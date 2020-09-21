@@ -5,7 +5,7 @@ namespace MplusKASSA\SOAP;
 use GuzzleHttp\Client as HttpClient;
 use DOMDocument;
 use DOMElement;
-use Mpluskassa\Support\ApiException;
+use MplusKASSA\Support\ApiException;
 
 class Client {
 
