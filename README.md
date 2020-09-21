@@ -1,13 +1,12 @@
-# MplusKASSA SOAP API Client PHP
+# MplusKASSA SOAP API Client for PHP
+
+This SOAP API Client is intended to be lightweight and fast, so no wrappers, WSDL-file or SoapClient is used.
+
+Use your personal MplusKASSA API documentation for reference: https://api.mpluskassa.nl:YOUR_API_PORT/?docs
 
 ---
 
-This api client is intended to be lightweight and fast so no wrappers, wsdl or soapclient is used. 
-Use your api documentation for reference : https://api.mpluskassa.nl:YOUR_API_PORT/?docs
-
----
-
-Usage :
+Usage:
 ```
 <?php
 use MplusKASSA\SOAP\Client;
