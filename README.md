@@ -11,7 +11,7 @@ Usage :
 ```
 <?php
 use Mpluskassa\Soap\Client;
-use Mpluskassa\Soap\ApiException;
+use Mpluskassa\Support\ApiException;
 
 $apiServer = "https://api.mpluskassa.nl";
 $apiPort = YOUR_API_PORT;
