@@ -7,8 +7,10 @@ Use your personal MplusKASSA API documentation for reference: https://api.mplusk
 ---
 
 Usage:
-```
+
+```php
 <?php
+
 use MplusKASSA\SOAP\Client;
 use MplusKASSA\Support\ApiException;
 
