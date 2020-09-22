@@ -4,6 +4,9 @@ This SOAP API Client is intended to be lightweight and fast, so no wrappers, WSD
 
 Use your personal MplusKASSA API documentation for reference: https://api.mpluskassa.nl:YOUR_API_PORT/?docs
 
+Please note that all "List" elements will be filtered and standardized by the client. 
+E.g. GetProductsResponse has $response->productList which contains an array with all products and loses the $response->productList->product property.
+
 ---
 
 Usage:

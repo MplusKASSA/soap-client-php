@@ -57,7 +57,9 @@ class Client {
                 }
                 if (is_array($returnValue = $parsedXML->xpath(sprintf('//%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
                     $this->duration = microtime(true) - $startTime;
-                    return json_decode(json_encode(reset($returnValue)));
+                    $returnValue = json_decode(json_encode(reset($returnValue)));
+                    $this->filterResultLists($returnValue);
+                    return $returnValue;
                 }
                 throw new Exception("No valid response", 3000);
             } else {
@@ -165,6 +167,32 @@ class Client {
             return "";
         }
         return substr($xml, $startPos, $endPos - $startPos);
+    }
+
+    private function filterResultLists(&$soapResult) {
+        if (is_object($soapResult)) {
+            foreach ($soapResult as $key => $value) {
+                if (is_object($value)) {
+                    if (strpos($key, 'List') !== false) {
+                        $soapResult->$key = reset($value);
+                        if (!is_array($soapResult->$key)) {
+                            if (!empty($soapResult->$key)) {
+                                $soapResult->$key = [$soapResult->$key];
+                            } else {
+                                $soapResult->$key = [];
+                            }
+                        }
+                        $this->filterResultLists($soapResult->$key);
+                    }
+                } elseif (is_array($value)) {
+                    $this->filterResultLists($soapResult->$key);
+                }
+            }
+        } elseif (is_array($soapResult)) {
+            foreach ($soapResult as $key => $value) {
+                $this->filterResultLists($soapResult[$key]);
+            }
+        }
     }
 
 }
