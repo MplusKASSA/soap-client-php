@@ -58,7 +58,7 @@ class Client {
                 if (is_array($returnValue = $parsedXML->xpath(sprintf('//%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
                     $this->duration = microtime(true) - $startTime;
                     $returnValue = json_decode(json_encode(reset($returnValue)));
-                    $this->filterResultLists($returnValue);
+                    $this->standardizeResultLists($returnValue);
                     return $returnValue;
                 }
                 throw new Exception("No valid response", 3000);
@@ -169,28 +169,32 @@ class Client {
         return substr($xml, $startPos, $endPos - $startPos);
     }
 
-    private function filterResultLists(&$soapResult) {
+    private function standardizeResultLists(&$soapResult) {
         if (is_object($soapResult)) {
             foreach ($soapResult as $key => $value) {
                 if (is_object($value)) {
                     if (strpos($key, 'List') !== false) {
-                        $soapResult->$key = reset($value);
-                        if (!is_array($soapResult->$key)) {
-                            if (!empty($soapResult->$key)) {
-                                $soapResult->$key = [$soapResult->$key];
-                            } else {
-                                $soapResult->$key = [];
-                            }
+                        $listElement = null;
+                        foreach ($soapResult->$key as $elementName => $elementValue) {
+                            $listElement = $elementName;
+                            break;
                         }
-                        $this->filterResultLists($soapResult->$key);
+                        if (!is_null($listElement) && isset($soapResult->$key->$listElement) && !is_array($soapResult->$key->$listElement)) {
+                            if (!empty($soapResult->$key->$listElement)) {
+                                $soapResult->$key->$listElement = [$soapResult->$key->$listElement];
+                            } else {
+                                $soapResult->$key->$listElement = [];
+                            }
+                            $this->standardizeResultLists($soapResult->$key->$listElement);
+                        }
                     }
                 } elseif (is_array($value)) {
-                    $this->filterResultLists($soapResult->$key);
+                    $this->standardizeResultLists($soapResult->$key);
                 }
             }
         } elseif (is_array($soapResult)) {
             foreach ($soapResult as $key => $value) {
-                $this->filterResultLists($soapResult[$key]);
+                $this->standardizeResultLists($soapResult[$key]);
             }
         }
     }
