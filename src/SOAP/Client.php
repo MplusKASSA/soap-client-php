@@ -179,11 +179,13 @@ class Client {
                             $listElement = $elementName;
                             break;
                         }
-                        if (!is_null($listElement) && isset($soapResult->$key->$listElement) && !is_array($soapResult->$key->$listElement)) {
-                            if (!empty($soapResult->$key->$listElement)) {
-                                $soapResult->$key->$listElement = [$soapResult->$key->$listElement];
-                            } else {
-                                $soapResult->$key->$listElement = [];
+                        if (!is_null($listElement) && isset($soapResult->$key->$listElement)) {
+                            if (!is_array($soapResult->$key->$listElement)) {
+                                if (!empty($soapResult->$key->$listElement)) {
+                                    $soapResult->$key->$listElement = [$soapResult->$key->$listElement];
+                                } else {
+                                    $soapResult->$key->$listElement = [];
+                                }
                             }
                             $this->standardizeResultLists($soapResult->$key->$listElement);
                         }
