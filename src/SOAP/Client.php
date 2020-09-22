@@ -58,7 +58,7 @@ class Client {
                 if (is_array($returnValue = $parsedXML->xpath(sprintf('//%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
                     $this->duration = microtime(true) - $startTime;
                     $returnValue = json_decode(json_encode(reset($returnValue)));
-                    $this->standardizeResultLists($returnValue);
+                    $this->standardizeResult($returnValue);
                     return $returnValue;
                 }
                 throw new Exception("No valid response", 3000);
@@ -169,36 +169,42 @@ class Client {
         return substr($xml, $startPos, $endPos - $startPos);
     }
 
-    private function standardizeResultLists(&$soapResult) {
+    private function standardizeResult(&$soapResult) {
         if (is_object($soapResult)) {
             foreach ($soapResult as $key => $value) {
                 if (is_object($value)) {
-                    if (strpos($key, 'List') !== false) {
-                        $listElement = null;
-                        foreach ($soapResult->$key as $elementName => $elementValue) {
-                            $listElement = $elementName;
-                            break;
-                        }
-                        if (!is_null($listElement) && isset($soapResult->$key->$listElement)) {
-                            if (!is_array($soapResult->$key->$listElement)) {
-                                if (!empty($soapResult->$key->$listElement)) {
-                                    $soapResult->$key->$listElement = [$soapResult->$key->$listElement];
-                                } else {
-                                    $soapResult->$key->$listElement = [];
+                    if (is_null($listElement = $this->getFirstProperty($soapResult->$key))) {
+                        $soapResult->$key = null;
+                    } else {
+                        if (strpos($key, 'List') !== false) {
+                            if (!is_null($listElement) && isset($soapResult->$key->$listElement)) {
+                                if (!is_array($soapResult->$key->$listElement)) {
+                                    if (!empty($soapResult->$key->$listElement)) {
+                                        $soapResult->$key->$listElement = [$soapResult->$key->$listElement];
+                                    } else {
+                                        $soapResult->$key->$listElement = [];
+                                    }
                                 }
+                                $this->standardizeResult($soapResult->$key->$listElement);
                             }
-                            $this->standardizeResultLists($soapResult->$key->$listElement);
                         }
                     }
                 } elseif (is_array($value)) {
-                    $this->standardizeResultLists($soapResult->$key);
+                    $this->standardizeResult($soapResult->$key);
                 }
             }
         } elseif (is_array($soapResult)) {
             foreach ($soapResult as $key => $value) {
-                $this->standardizeResultLists($soapResult[$key]);
+                $this->standardizeResult($soapResult[$key]);
             }
         }
+    }
+
+    private function getFirstProperty(object $object): ?string {
+        foreach ($object as $elementName => $elementValue) {
+            return $elementName;
+        }
+        return null;
     }
 
 }
