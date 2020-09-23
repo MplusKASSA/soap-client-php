@@ -2,37 +2,36 @@
 
 namespace MplusKASSA\SOAP;
 
-use GuzzleHttp\Client as HttpClient;
-use DOMDocument;
-use DOMElement;
 use MplusKASSA\Support\ApiException;
+use MplusKASSA\SOAP\ClientBase;
 
-class Client {
+/**
+ * MplusKASSA SOAP API client PHP
+ *
+ */
+class Client extends ClientBase {
 
-    private const VERSION = "1.0.0";
-    private const DEFAULT_CONNECT_TIMEOUT_SECS = 30;
-    private const DEFAULT_TIMEOUT_SECS = 600;
-
-    private HttpClient $client;
-    private float $duration = 0;
-    private string $lastRequestXML;
-    private string $lastResponseXML;
-    private string $requestId;
-    private float $connectTimeout;
-    private float $timeout;
-
+    /**
+     * construct
+     * 
+     * @param string $apiServer         The URL of your api server, e.g. : https://api.mpluskassa.nl
+     * @param int $apiPort              Your api port number
+     * @param string $ident             Your api ident / username
+     * @param string $secret            Your api secret / password 
+     */
     public function __construct(string $apiServer, int $apiPort, string $ident, string $secret) {
-        $this->client = new HttpClient([
-            'base_uri' => sprintf("%s:%u", $apiServer, $apiPort),
-            'query' => [
-                'ident' => $ident,
-                'secret' => $secret
-            ],
-        ]);
-        $this->connectTimeout = self::DEFAULT_CONNECT_TIMEOUT_SECS;
-        $this->timeout = self::DEFAULT_TIMEOUT_SECS;
+        parent::__construct($apiServer, $apiPort, $ident, $secret);
     }
 
+    /**
+     * execute
+     * Execute an API method
+     * 
+     * @param string $method            The api method you wish to execute, e.g. getProducts
+     * @param array $requestArray       Optional : The request array with parameters if applicable for the method
+     * @param string $requestId         Optional : The requestId, here you can add an reference for easy debugging
+     * @return object                   Response object
+     */
     public function execute(string $method, ?array $requestArray = null, ?string $requestId = null): object {
         $this->lastRequestXML = "";
         $this->lastResponseXML = "";
@@ -70,141 +69,76 @@ class Client {
         }
     }
 
-    public function getLastRequestXML() {
+    /**
+     * getLastRequestXML
+     * Get last XML of the request
+     * @return string Last request XML
+     */
+    public function getLastRequestXML(): string {
         return $this->lastRequestXML;
     }
 
-    public function getLastResponseXML() {
+    /**
+     * getLastResponseXML
+     * Get last XML of the response
+     * @return string Last response XML
+     */
+    public function getLastResponseXML(): string {
         return $this->lastResponseXML;
     }
 
+    /**
+     * getLastCallDurationInSeconds
+     * Retrieve the duration in seconds of the last call
+     * @return float Last call duration
+     */
     public function getLastCallDurationInSeconds(): float {
         return round($this->duration, 1);
     }
 
+    /**
+     * getLastRequestId
+     * Get last request Id of the request
+     * @return string Last request Id
+     */
     public function getLastRequestId(): string {
         return $this->requestId;
     }
 
-    public function setConnectTimeout(float $connectTimoutInSeconds) {
+    /**
+     * setConnectTimeout
+     * Set connection timeout
+     * @return void
+     */
+    public function setConnectTimeout(float $connectTimoutInSeconds): void {
         $this->connectTimeout = $connectTimoutInSeconds;
     }
 
-    public function setTimeout(float $timeoutInSeconds) {
+    /**
+     * setTimeout
+     * Set the timeout
+     * @return void
+     */
+    public function setTimeout(float $timeoutInSeconds): void {
         $this->timeout = $timeoutInSeconds;
     }
 
-    private function buildRequestHeaders(string $method, ?string $requestId = null): array {
-        $this->requestId = $requestId ?? uniqid("mpac_");
-        return [
-            'User-Agent' => sprintf("%s %s", __CLASS__, self::VERSION),
-            'Content-Type' => 'text/xml; charset=utf-8',
-            'SOAPAction' => $method,
-            'X-Request-Id' => $this->requestId,
-        ];
-    }
-
-    private function createXML(string $method, ?array $requestArray): string {
-        $dom = new DOMDocument();
-        $dom->encoding = 'utf-8';
-        $dom->xmlVersion = '1.0';
-        $dom->formatOutput = true;
-        $soapEnv = $dom->createElement("SOAP-ENV:Envelope");
-        $soapEnv->setAttribute('xmlns:SOAP-ENV', 'http://schemas.xmlsoap.org/soap/envelope/');
-        $soapEnv->setAttribute('xmlns:SOAP-ENC', 'http://schemas.xmlsoap.org/soap/encoding/');
-        $soapEnv->setAttribute('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance');
-        $soapEnv->setAttribute('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema');
-        $soapEnv->setAttribute('xmlns:ns1', 'urn:mplusqapi');
-        $soapBody = $dom->createElement("SOAP-ENV:Body");
-        $methodElement = $dom->createElement(sprintf("ns1:%s", $method));
-        $this->addRequestArray($dom, $methodElement, $requestArray);
-        $soapBody->appendChild($methodElement);
-        $soapEnv->appendChild($soapBody);
-        $dom->appendChild($soapEnv);
-        return $dom->saveXML();
-    }
-
-    private function addRequestArray(DOMDocument &$dom, DOMElement &$methodElement, $requestArray): void {
-        if ($requestArray !== null) {
-            if (is_array($requestArray)) {
-                if (!is_string(array_key_first($requestArray))) {
-                    foreach ($requestArray as $key => $requestArrayItem) {
-                        $this->addRequestArray($dom, $methodElement, $requestArray[$key]);
-                    }
-                } else {
-                    foreach ($requestArray as $key => $value) {
-                        if (is_array($value) && (is_array(reset($value)) && is_string(array_key_first(reset($value))) || is_string(array_key_first($value)))) {
-                            $requestElement = $dom->createElement($key);
-                            $methodElement->appendChild($requestElement);
-                            $this->addRequestArray($dom, $requestElement, $value);
-                        } else {
-                            if (is_array($value)) {
-                                foreach ($value as $itemValue) {
-                                    $requestElement = $dom->createElement($key);
-                                    $methodElement->appendChild($requestElement);
-                                    $requestElement->nodeValue = $itemValue;
-                                }
-                            } else {
-                                $requestElement = $dom->createElement($key);
-                                $methodElement->appendChild($requestElement);
-                                $requestElement->nodeValue = $value;
-                            }
-                        }
-                    }
-                }
-            }
+    /**
+     * prepareRequest
+     * Prepare request to use for the execute. If the request contains objects,
+     * these will be converted to arrays. Also list elements can be added here.
+     * 
+     * @param mixed $request            The request array/object. Passed by reference, so will be modified 
+     * @param array $addListElements    Key => value array where the key is the name of the 
+     * list : e.g. 'lineList' and the value is the element to add : e.g. 'line'.
+     * This will result in all array items being wrapped in a line element.
+     * @return void
+     */
+    public function prepareRequest(&$request, array $addListElements = []): void {
+        $request = (array) json_decode(json_encode($request), true); // Convert objects to array
+        if (count($addListElements)) {
+            $this->addListElementToRequest($request, $addListElements);
         }
-    }
-
-    private function getResponseObjectName(string $xml): string {
-        if (($startPos = strpos($xml, "SOAP-ENV:Body")) === false) {
-            return "";
-        }
-        if (($startPos = strpos($xml, "ns:", $startPos)) === false) {
-            return "";
-        }
-        if (($endPos = strpos($xml, ">", $startPos)) === false) {
-            return "";
-        }
-        return substr($xml, $startPos, $endPos - $startPos);
-    }
-
-    private function standardizeResult(&$soapResult) {
-        if (is_object($soapResult)) {
-            foreach ($soapResult as $key => $value) {
-                if (is_object($value)) {
-                    if (is_null($listElement = $this->getFirstProperty($soapResult->$key))) {
-                        $soapResult->$key = null;
-                    } else {
-                        if (strpos($key, 'List') !== false) {
-                            if (!is_null($listElement) && isset($soapResult->$key->$listElement)) {
-                                if (!is_array($soapResult->$key->$listElement)) {
-                                    if (!empty($soapResult->$key->$listElement)) {
-                                        $soapResult->$key->$listElement = [$soapResult->$key->$listElement];
-                                    } else {
-                                        $soapResult->$key->$listElement = [];
-                                    }
-                                }
-                                $this->standardizeResult($soapResult->$key->$listElement);
-                            }
-                        }
-                    }
-                } elseif (is_array($value)) {
-                    $this->standardizeResult($soapResult->$key);
-                }
-            }
-        } elseif (is_array($soapResult)) {
-            foreach ($soapResult as $key => $value) {
-                $this->standardizeResult($soapResult[$key]);
-            }
-        }
-    }
-
-    private function getFirstProperty(object $object): ?string {
-        foreach ($object as $elementName => $elementValue) {
-            return $elementName;
-        }
-        return null;
     }
 
 }

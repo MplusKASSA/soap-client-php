@@ -26,7 +26,7 @@ $client = new Client($apiServer, $apiPort, $apiIdent, $apiSecret);
 
 $apiMethod = "getArticleGroupChanges"; // <-- This is the API method, get this from documentation after "Input:" for the desired call
 
-// Build the request object as documented in your personal documentation for the specific API method
+// Build the request array as documented in your personal documentation for the specific API method. Please note : Don't add list elements, this will be done by the prepareRequest method
 $requestArray = [
     'request' => [
         [
@@ -40,6 +40,19 @@ $requestArray = [
 ];
 
 try {
+// If your request is an object or mixed object/array, then the prepareRequest will convert it to an array suitable for the execute call
+// If your request contains one or more 'List's, the can be wrapped in the required element using the prepareRequest second parameter
+    $client->prepareRequest($requestArray, [ 
+        'productList' => 'product',             // This will convert the productList array in a items wrapped in the product element
+        'articleList' => 'article',             // See the wsdl/doc for required elements
+        'lineList' => 'line',
+        'paymentList' => 'payment',
+        'preparationList' => 'line',
+        'preparationMethodList' => 'preparationMethod',
+        'imageList' => 'image',
+        'customFieldList' => 'customField',
+        'sortOrderGroupList' => 'sortOrderGroup',
+    ]);
     $response = $client->execute($apiMethod, $requestArray); // <-- execute the request
     print_r($response);
     foreach($response->changedArticleGroupList->changedArticleGroups as $articleGroup) { // <-- access the response as an object
