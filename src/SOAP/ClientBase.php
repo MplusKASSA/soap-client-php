@@ -24,6 +24,8 @@ abstract class ClientBase {
     protected float $connectTimeout;
     protected float $timeout;
 
+    private const FILTER_LIST_IDENTIFIERS = ['List', 'Ids'];
+
     /**
      * construct
      * 
@@ -182,7 +184,7 @@ abstract class ClientBase {
                     if (is_null($listElement = $this->getFirstProperty($soapResult->$key))) {
                         $soapResult->$key = null;   // Empty object does not make sense, replace by null (*2)
                     } else {
-                        if (strpos($key, 'List') !== false) {
+                        if ($this->isListIdentifier($key)) {
                             if (!is_null($listElement) && isset($soapResult->$key->$listElement)) {
                                 $soapResult->$key = $soapResult->$key->$listElement;    // Remove list element (*1)
                                 if (!is_array($soapResult->$key)) {
@@ -237,6 +239,24 @@ abstract class ClientBase {
             'SOAPAction' => $method,
             'X-Request-Id' => $this->requestId,
         ];
+    }
+
+    /**
+     * isListIdentifier
+     * Is this identifier in the known list identifiers ?
+     * 
+     * @param mixed $identifier     Identifier property / key
+     * @return bool True if in the list, false if not
+     */
+    private function isListIdentifier($identifier): bool {
+        if (is_string($identifier)) {
+            foreach (self::FILTER_LIST_IDENTIFIERS as $listIdentifier) {
+                if (strpos($identifier, $listIdentifier) !== false) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
