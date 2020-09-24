@@ -10,7 +10,7 @@ use GuzzleHttp\Client as HttpClient;
  * MplusKASSA SOAP API client PHP Client Base class
  *
  */
-class ClientBase {
+abstract class ClientBase {
 
     protected const VERSION = "1.0.0";
     protected const DEFAULT_CONNECT_TIMEOUT_SECS = 30;
