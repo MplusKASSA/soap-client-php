@@ -192,9 +192,9 @@ abstract class ClientBase {
                                         $soapResult->$key = []; // Create empty array for list (*3)
                                     }
                                 }
-                                $this->standardizeResult($soapResult->$key);
                             }
                         }
+                        $this->standardizeResult($soapResult->$key);
                     }
                 } elseif (is_array($value)) {
                     $this->standardizeResult($soapResult->$key);
