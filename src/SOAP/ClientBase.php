@@ -5,6 +5,7 @@ namespace MplusKASSA\SOAP;
 use DOMDocument;
 use DOMElement;
 use GuzzleHttp\Client as HttpClient;
+use GuzzleHttp\Exception\ServerException;
 
 /**
  * MplusKASSA SOAP API client PHP Client Base class
@@ -23,6 +24,7 @@ abstract class ClientBase {
     protected string $requestId = "";
     protected float $connectTimeout;
     protected float $timeout;
+    protected ?string $soapFault = null;
 
     private const FILTER_LIST_IDENTIFIERS = ['List', 'Ids'];
 
@@ -257,6 +259,23 @@ abstract class ClientBase {
             }
         }
         return false;
+    }
+
+    /**
+     * setSoapFault
+     * Try to set soap fault from body if present
+     * 
+     * @param ServerException $e     ServerException
+     */
+    protected function setSoapFault(ServerException $e): void {
+        $this->soapFault = null;
+        $bodyXML = $e->getResponse()->getBody()->getContents();
+        if (($parsedXML = simplexml_load_string($bodyXML)) !== false) {
+            if (is_array($returnValue = $parsedXML->xpath('//faultstring')) && count($returnValue) && is_object(reset($returnValue))) {
+                $returnValue = json_decode(json_encode(reset($returnValue)));
+                $this->soapFault = reset($returnValue);
+            }
+        }
     }
 
 }
