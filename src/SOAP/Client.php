@@ -50,11 +50,11 @@ class Client extends ClientBase {
             if (($responseCode = $response->getStatusCode()) === 200) {
                 $responseXML = $response->getBody()->getContents();
                 if (empty($responseObjectName = $this->getResponseObjectName($responseXML))) {
-                    throw new Exception("Could not find response object", 1000);
+                    throw new \Exception("Could not find response object", 1000);
                 }
                 $this->lastResponseXML = $responseXML;
                 if (($parsedXML = simplexml_load_string($responseXML)) === false) {
-                    throw new Exception("Could not parse XML", 2000);
+                    throw new \Exception("Could not parse XML", 2000);
                 }
                 if (is_array($returnValue = $parsedXML->xpath(sprintf('//%s', $responseObjectName))) && count($returnValue) && is_object(reset($returnValue))) {
                     $this->duration = microtime(true) - $startTime;
@@ -62,10 +62,10 @@ class Client extends ClientBase {
                     $this->standardizeResult($returnValue);
                     return $returnValue;
                 }
-                throw new Exception("No valid response", 3000);
+                throw new \Exception("No valid response", 3000);
             } else {
                 echo "DBG2";
-                throw new Exception("Received a HTTP Code : " . $responseCode, 4000);
+                throw new \Exception("Received a HTTP Code : " . $responseCode, 4000);
             }
         } catch (ServerException $e) {
             $this->setSoapFault($e);
