@@ -46,7 +46,6 @@ class Client extends ClientBase {
                 'connect_timeout' => $this->connectTimeout,
                 'timeout' => $this->timeout,
             ]);
-            echo "DBG1";
             if (($responseCode = $response->getStatusCode()) === 200) {
                 $responseXML = $response->getBody()->getContents();
                 if (empty($responseObjectName = $this->getResponseObjectName($responseXML))) {
@@ -64,7 +63,6 @@ class Client extends ClientBase {
                 }
                 throw new \Exception("No valid response", 3000);
             } else {
-                echo "DBG2";
                 throw new \Exception("Received a HTTP Code : " . $responseCode, 4000);
             }
         } catch (ServerException $e) {
