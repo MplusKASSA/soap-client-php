@@ -37,6 +37,9 @@ abstract class ClientBase {
      * @param string $secret            Your api secret / password 
      */
     public function __construct(string $apiServer, int $apiPort, string $ident, string $secret) {
+        if (0 !== stripos($apiServer, 'http')) {
+            $apiServer = 'https://'.$apiServer;
+        }
         $this->client = new HttpClient([
             'base_uri' => sprintf("%s:%u", $apiServer, $apiPort),
             'query' => [
