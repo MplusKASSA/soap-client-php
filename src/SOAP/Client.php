@@ -52,6 +52,7 @@ class Client extends ClientBase {
                     throw new \Exception("Could not find response object", 1000);
                 }
                 $this->lastResponseXML = $responseXML;
+                $this->filterNamespace($responseXML);
                 if (($parsedXML = simplexml_load_string($responseXML)) === false) {
                     throw new \Exception("Could not parse XML", 2000);
                 }
@@ -67,7 +68,7 @@ class Client extends ClientBase {
             }
         } catch (ServerException $e) {
             $this->setSoapFault($e);
-            if(!is_null($soapFault = $this->getSoapFault())) {
+            if (!is_null($soapFault = $this->getSoapFault())) {
                 $errorMessage = sprintf("SoapFault : %s", $soapFault);
             } else {
                 $errorMessage = sprintf("ServerException : %s", $e->getMessage());
@@ -129,7 +130,7 @@ class Client extends ClientBase {
     public function setTimeout(float $timeoutInSeconds): void {
         $this->timeout = $timeoutInSeconds;
     }
-    
+
     /**
      * getSoapFault
      * Get soap fault if any

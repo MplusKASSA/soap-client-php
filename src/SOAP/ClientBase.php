@@ -38,7 +38,7 @@ abstract class ClientBase {
      */
     public function __construct(string $apiServer, int $apiPort, string $ident, string $secret) {
         if (0 !== stripos($apiServer, 'http')) {
-            $apiServer = 'https://'.$apiServer;
+            $apiServer = 'https://' . $apiServer;
         }
         $this->client = new HttpClient([
             'base_uri' => sprintf("%s:%u", $apiServer, $apiPort),
@@ -103,7 +103,7 @@ abstract class ClientBase {
         $soapEnv->setAttribute('xmlns:xsd', 'http://www.w3.org/2001/XMLSchema');
         $soapEnv->setAttribute('xmlns:ns1', 'urn:mplusqapi');
         $soapBody = $dom->createElement("SOAP-ENV:Body");
-        $methodElement = $dom->createElement('ns1:'.$method);
+        $methodElement = $dom->createElement('ns1:' . $method);
         $this->addRequestArray($dom, $methodElement, $requestArray);
         $soapBody->appendChild($methodElement);
         $soapEnv->appendChild($soapBody);
@@ -130,18 +130,18 @@ abstract class ClientBase {
                 } else {
                     foreach ($requestArray as $key => $value) {
                         if (is_array($value) && (is_array(reset($value)) && is_string(array_key_first(reset($value))) || is_string(array_key_first($value)))) {
-                            $requestElement = $dom->createElement('ns1:'.$key);
+                            $requestElement = $dom->createElement('ns1:' . $key);
                             $methodElement->appendChild($requestElement);
                             $this->addRequestArray($dom, $requestElement, $value);
                         } else {
                             if (is_array($value)) {
                                 foreach ($value as $itemValue) {
-                                    $requestElement = $dom->createElement('ns1:'.$key);
+                                    $requestElement = $dom->createElement('ns1:' . $key);
                                     $methodElement->appendChild($requestElement);
                                     $requestElement->nodeValue = $itemValue;
                                 }
                             } else {
-                                $requestElement = $dom->createElement('ns1:'.$key);
+                                $requestElement = $dom->createElement('ns1:' . $key);
                                 $methodElement->appendChild($requestElement);
                                 $requestElement->nodeValue = $value;
                             }
@@ -169,6 +169,7 @@ abstract class ClientBase {
         if (($endPos = strpos($xml, ">", $startPos)) === false) {
             return "";
         }
+        $startPos += strlen("ns:");
         return substr($xml, $startPos, $endPos - $startPos);
     }
 
@@ -279,6 +280,11 @@ abstract class ClientBase {
                 $this->soapFault = reset($returnValue);
             }
         }
+    }
+    
+    protected function filterNamespace(&$xml): void {
+        $xml = str_replace('<ns:', '<', $xml);
+        $xml = str_replace('</ns:', '</', $xml);
     }
 
 }
