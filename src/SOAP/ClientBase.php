@@ -188,7 +188,11 @@ abstract class ClientBase {
             foreach ($soapResult as $key => $value) {
                 if (is_object($value)) {
                     if (is_null($listElement = $this->getFirstProperty($soapResult->$key))) {
-                        $soapResult->$key = null;   // Empty object does not make sense, replace by null (*2)
+                        if ($this->isListIdentifier($key)) {
+                            $soapResult->$key = [];     // Create empty array for list (*3)
+                        } else {
+                            $soapResult->$key = null;   // Empty object does not make sense, replace by null (*2)
+                        }
                     } else {
                         if ($this->isListIdentifier($key)) {
                             if (!is_null($listElement) && isset($soapResult->$key->$listElement)) {
@@ -281,8 +285,14 @@ abstract class ClientBase {
             }
         }
     }
-    
-    protected function filterNamespace(&$xml): void {
+
+    /**
+     * filterNamepsace
+     * Filter namespace elements before using xpath to recursively retrieve
+     * elements.
+     * @param string $xml   XML to filter, passed by reference
+     */
+    protected function filterNamespace(string &$xml): void {
         $xml = str_replace('<ns:', '<', $xml);
         $xml = str_replace('</ns:', '</', $xml);
     }
