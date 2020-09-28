@@ -130,18 +130,18 @@ abstract class ClientBase {
                 } else {
                     foreach ($requestArray as $key => $value) {
                         if (is_array($value) && (is_array(reset($value)) && is_string(array_key_first(reset($value))) || is_string(array_key_first($value)))) {
-                            $requestElement = $dom->createElement($key);
+                            $requestElement = $dom->createElement('ns1:'.$key);
                             $methodElement->appendChild($requestElement);
                             $this->addRequestArray($dom, $requestElement, $value);
                         } else {
                             if (is_array($value)) {
                                 foreach ($value as $itemValue) {
-                                    $requestElement = $dom->createElement($key);
+                                    $requestElement = $dom->createElement('ns1:'.$key);
                                     $methodElement->appendChild($requestElement);
                                     $requestElement->nodeValue = $itemValue;
                                 }
                             } else {
-                                $requestElement = $dom->createElement($key);
+                                $requestElement = $dom->createElement('ns1:'.$key);
                                 $methodElement->appendChild($requestElement);
                                 $requestElement->nodeValue = $value;
                             }
