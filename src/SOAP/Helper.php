@@ -10,13 +10,15 @@ class Helper {
     /**
      * getQuantityAndDecimalPlaces
      * 
-     * @param string $input         Input string with decimal/float with . or ,
+     * @param mixed $input         Input string with decimal/float with . or ,
      *
      * @return array with quantity and decimal places
      */
-    public static function getQuantityAndDecimalPlaces(string $input): array {
-        $input = str_replace(',', '.', $input);
-        $input = round($input, 6);
+    public static function getQuantityAndDecimalPlaces($input): array {
+        if (is_string($input)) {
+            $input = str_replace(',', '.', $input);
+        }
+        $input = round(floatval($input), 6);
         $origInput = $input;
         $decimalPlaces = -1;
         do {
@@ -34,16 +36,14 @@ class Helper {
     /**
      * fromQuantityAndDecimalPlaces
      * 
-     * @param int $quantity         The quantity
+     * @param mixed $quantity         The quantity
      * @param int $decimalPlaces    Optional amount of decimal places
      *
      * @return float
      */
-    public static function fromQuantityAndDecimalPlaces(int $quantity, ?int $decimalPlaces): float {
-        if (is_null($decimalPlaces)) {
-            $decimalPlaces = 0;
-        }
-        $output = (float) $quantity;
+    public static function fromQuantityAndDecimalPlaces($quantity, $decimalPlaces): float {
+        $decimalPlaces = intval($decimalPlaces);
+        $output = (float) intval($quantity);
         $decimalPlaces = (float) $decimalPlaces;
         $output = $output / pow(10, $decimalPlaces);
         return $output;
