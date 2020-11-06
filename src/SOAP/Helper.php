@@ -28,7 +28,7 @@ class Helper {
             $input = round($input, 6);
             $decimalPlaces++;
         }
-        while ($input >= 0.0000001);
+        while (abs($input) >= 0.0000001);
         $quantity = (int) ($origInput * pow(10, $decimalPlaces));
         return array($quantity, $decimalPlaces);
     }
