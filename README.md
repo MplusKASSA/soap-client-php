@@ -1,4 +1,9 @@
-# MplusKASSA SOAP API Client for PHP
+# MplusKASSA SOAP API Client for PHP - Pre alpha release !
+
+WARNING : 
+This is a pre-alpha release, use at your own risk. All features, interfaces are
+subject to change !
+
 
 This SOAP API Client is intended to be lightweight and fast, so no wrappers, WSDL-file or SoapClient is used.
 
