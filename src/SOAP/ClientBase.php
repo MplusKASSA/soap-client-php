@@ -84,6 +84,29 @@ abstract class ClientBase {
     }
 
     /**
+     * renameKeys
+     * Rename keys in the request array
+     * 
+     * @param array $request            The request array. Passed by reference, so will be modified 
+     * @param array $renameKeys         Key => value array where the key is the sourceName and the value is the targetName
+     * @return void
+     */
+    protected function renameKeys(array &$requestArray, array $renameKeys): void {
+        foreach ($requestArray as $idx => $value) {
+            if (is_array($value)) {
+                $this->renameKeys($requestArray[$idx], $renameKeys);
+            }
+            foreach ($renameKeys as $sourceName => $targetName) {
+                if ($idx === $sourceName) {
+                    $requestArray[$targetName] = $requestArray[$sourceName];
+                    unset($requestArray[$sourceName]);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
      * createXML
      * Create XML request for the method and requestArray
      * 

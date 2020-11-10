@@ -144,18 +144,23 @@ class Client extends ClientBase {
      * prepareRequest
      * Prepare request to use for the execute. If the request contains objects,
      * these will be converted to arrays. Also list elements can be added here.
+     * If renameKeys are present, the keys are first renamed and after that list elements are added on the new keys.
      * 
      * @param mixed $request            The request array/object. Passed by reference, so will be modified 
      * @param array $addListElements    Key => value array where the key is the name of the 
      * list : e.g. 'lineList' and the value is the element to add : e.g. 'line'.
      * This will result in all array items being wrapped in a line element.
+     * @param array $renameKeys         Key => value array where the key is the sourceName and the value is the targetName
      * @return void
      */
-    public function prepareRequest(&$request, array $addListElements = []): void {
+    public function prepareRequest(&$request, array $addListElements = [], array $renameKeys = []): void {
         $request = (array) json_decode(json_encode($request), true); // Convert objects to array
+        if (count($renameKeys)) {
+            $this->renameKeys($request, $renameKeys);
+        }
         if (count($addListElements)) {
             $this->addListElementToRequest($request, $addListElements);
-        }
+        }  
     }
 
 }
