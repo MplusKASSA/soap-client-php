@@ -3,6 +3,7 @@
     "description": "PHP Client for the MplusKASSA SOAP API",
     "license": "MIT",
     "require": {
+        "php": "^7.4",
         "guzzlehttp/guzzle": "^6.5"
     },
     "autoload": {
