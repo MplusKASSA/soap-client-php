@@ -107,6 +107,25 @@ abstract class ClientBase {
     }
 
     /**
+     * convertBoolValues
+     * Convert bool values to int values. Otherwise false values are empty.
+     * 
+     * @param array $request            The request array. Passed by reference, so will be modified 
+     * @return void
+     */
+    protected function convertBoolValues(array &$requestArray): void {
+        foreach ($requestArray as $idx => $value) {
+            if (is_array($value)) {
+                $this->convertBoolValues($requestArray[$idx]);
+            } else {
+                if (is_bool($value)) {
+                    $requestArray[$idx] = intval($value);
+                }
+            }
+        }
+    }
+
+    /**
      * createXML
      * Create XML request for the method and requestArray
      * 

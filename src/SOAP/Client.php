@@ -145,6 +145,7 @@ class Client extends ClientBase {
      * Prepare request to use for the execute. If the request contains objects,
      * these will be converted to arrays. Also list elements can be added here.
      * If renameKeys are present, the keys are first renamed and after that list elements are added on the new keys.
+     * Booleans will be converted to integers, otherwise false values will be empty, resulting in a soap fault.
      * 
      * @param mixed $request            The request array/object. Passed by reference, so will be modified 
      * @param array $addListElements    Key => value array where the key is the name of the 
@@ -161,6 +162,7 @@ class Client extends ClientBase {
         if (count($addListElements)) {
             $this->addListElementToRequest($request, $addListElements);
         }  
+        $this->convertBoolValues($request);
     }
 
 }
