@@ -232,12 +232,14 @@ abstract class ClientBase {
                 if (is_object($value)) {
                     if (is_null($listElement = $this->getFirstProperty($soapResult->$key))) {
                         if ($this->isListIdentifier($key)) {
+                            echo " 2." . $key . " ";
                             $soapResult->$key = [];     // Create empty array for list (*3)
                         } else {
                             $soapResult->$key = null;   // Empty object does not make sense, replace by null (*2)
                         }
                     } else {
                         if ($this->isListIdentifier($key)) {
+                            echo " 1." . $key . " ";
                             if (!is_null($listElement) && isset($soapResult->$key->$listElement)) {
                                 $soapResult->$key = $soapResult->$key->$listElement;    // Remove list element (*1)
                                 if (!is_array($soapResult->$key)) {
@@ -255,6 +257,14 @@ abstract class ClientBase {
                     $this->standardizeResult($soapResult->$key);
                 } elseif (is_string($value) && in_array(strtolower($value), ['true', 'false'])) {   // Convert 'true'/'false' text values to int 1/0 (*4)
                     $soapResult->$key = strtolower($value) == 'true' ? 1 : 0;
+                } elseif ($this->isListIdentifier($key)) {
+                    if (!is_array($soapResult->$key)) {
+                        if (!empty($soapResult->$key)) {
+                            $soapResult->$key = [$soapResult->$key];    // Create array for list (*3)
+                        } else {
+                            $soapResult->$key = []; // Create empty array for list (*3)
+                        }
+                    }
                 }
             }
         } elseif (is_array($soapResult)) {
