@@ -221,7 +221,7 @@ abstract class ClientBase {
      * (*1). Remove list elements : e.g. productList->product[] -> productList[]
      * (*2). If properties are empty, they contain an empty object. This will be replaced by null
      * (*3). Make sure that lists are an array
-     * (*4). Convert 'true'/'false' text values to bool true/false
+     * (*4). Convert 'true'/'false' text values to int 1/0
      * 
      * @param mixed $soapResult     Soap result
      * @return void
@@ -253,8 +253,8 @@ abstract class ClientBase {
                     }
                 } elseif (is_array($value)) {
                     $this->standardizeResult($soapResult->$key);
-                } elseif (is_string($value) && in_array(strtolower($value), ['true', 'false'])) {
-                    $soapResult->key = strtolower($value) == 'true' ? true : false;
+                } elseif (is_string($value) && in_array(strtolower($value), ['true', 'false'])) {   // Convert 'true'/'false' text values to int 1/0 (*4)
+                    $soapResult->$key = strtolower($value) == 'true' ? 1 : 0;
                 }
             }
         } elseif (is_array($soapResult)) {
