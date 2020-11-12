@@ -129,5 +129,16 @@ class Helper {
             }
         }
     }
+    
+    /**
+     * toArray
+     * 
+     * Convert object data to assoc array
+     * 
+     * @param mixed     $data                           Data to convert to assoc array
+     */
+    public static function objectToArray(&$data): void {
+        $data = (array)json_decode(json_encode($data), true);
+    }
 
 }

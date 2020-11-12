@@ -5,6 +5,7 @@ namespace MplusKASSA\SOAP;
 use MplusKASSA\Support\ApiException;
 use MplusKASSA\SOAP\ClientBase;
 use GuzzleHttp\Exception\ServerException;
+use MplusKASSA\SOAP\Helper;
 
 /**
  * MplusKASSA SOAP API client PHP
@@ -155,7 +156,7 @@ class Client extends ClientBase {
      * @return void
      */
     public function prepareRequest(&$request, array $addListElements = [], array $renameKeys = []): void {
-        $request = (array) json_decode(json_encode($request), true); // Convert objects to array
+        Helper::objectToArray($request);
         if (count($renameKeys)) {
             $this->renameKeys($request, $renameKeys);
         }
