@@ -232,14 +232,12 @@ abstract class ClientBase {
                 if (is_object($value)) {
                     if (is_null($listElement = $this->getFirstProperty($soapResult->$key))) {
                         if ($this->isListIdentifier($key)) {
-                            echo " 2." . $key . " ";
                             $soapResult->$key = [];     // Create empty array for list (*3)
                         } else {
                             $soapResult->$key = null;   // Empty object does not make sense, replace by null (*2)
                         }
                     } else {
                         if ($this->isListIdentifier($key)) {
-                            echo " 1." . $key . " ";
                             if (!is_null($listElement) && isset($soapResult->$key->$listElement)) {
                                 $soapResult->$key = $soapResult->$key->$listElement;    // Remove list element (*1)
                                 if (!is_array($soapResult->$key)) {
