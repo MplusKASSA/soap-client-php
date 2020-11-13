@@ -35,7 +35,9 @@ abstract class ClientBase {
         'branches' => true,
         'licensedBranches' => true,
         'workplaces' => true,
-        'Numbers' => false,
+        'subGroupNumbers' => true,  // put specific matches first
+        'productNumbers' => true,
+        'Numbers' => false,         // then less specific match
         'subGroups' => false,
         'serviceIpAddresses' => false,
         'subTables' => true,
@@ -45,6 +47,7 @@ abstract class ClientBase {
         'values' => false,
         'availableValues' => false,
         'entries' => false,
+        'purchaseDeliveryNumbers' => true,
     ];
 
     /**
