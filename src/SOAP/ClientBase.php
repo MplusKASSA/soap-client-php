@@ -26,22 +26,25 @@ abstract class ClientBase {
     protected float $timeout;
     protected ?string $soapFault = null;
 
-    private const FILTER_LIST_IDENTIFIERS = [
-        'List',
-        'Ids',
-        'Authorizations',
-        'branches',
-        'workplaces',
-        'Numbers',
-        'Groups',
-        'Addresses',
-        'Tables',
-        'Barcodes',
-        'Stocks',
-        'History',
-        'values',
-        'availableValues',
-        'entries',
+    //Key is (part of) the list name
+    //If value is true : first element will be removed from list
+    //If value is false: first element will not be removed from list
+    private const LIST_IDENTIFIERS = [
+        'List' => true,
+        'Ids' => false,
+        'branches' => true,
+        'licensedBranches' => true,
+        'workplaces' => true,
+        'Numbers' => false,
+        'subGroups' => false,
+        'serviceIpAddresses' => false,
+        'subTables' => true,
+        'articleBarcodes' => true,
+        'articleStocks' => false,
+        'articleStockHistory' => false,
+        'values' => false,
+        'availableValues' => false,
+        'entries' => false,
     ];
 
     /**
@@ -247,13 +250,13 @@ abstract class ClientBase {
             foreach ($soapResult as $key => $value) {
                 if (is_object($value)) {
                     if (is_null($listElement = $this->getFirstProperty($soapResult->$key))) {
-                        if ($this->isListIdentifier($key)) {
+                        if (!is_null($this->shouldRemoveListElement($key))) {
                             $soapResult->$key = [];     // Create empty array for list (*3)
                         } else {
                             $soapResult->$key = null;   // Empty object does not make sense, replace by null (*2)
                         }
                     } else {
-                        if ($this->isListIdentifier($key)) {
+                        if ($this->shouldRemoveListElement($key)) {
                             if (!is_null($listElement) && isset($soapResult->$key->$listElement)) {
                                 $soapResult->$key = $soapResult->$key->$listElement;    // Remove list element (*1)
                                 if (!is_array($soapResult->$key)) {
@@ -271,13 +274,11 @@ abstract class ClientBase {
                     $this->standardizeResult($soapResult->$key);
                 } elseif (is_string($value) && in_array(strtolower($value), ['true', 'false'])) {   // Convert 'true'/'false' text values to int 1/0 (*4)
                     $soapResult->$key = strtolower($value) == 'true' ? 1 : 0;
-                } elseif ($this->isListIdentifier($key)) {
-                    if (!is_array($soapResult->$key)) {
-                        if (!empty($soapResult->$key)) {
-                            $soapResult->$key = [$soapResult->$key];    // Create array for list (*3)
-                        } else {
-                            $soapResult->$key = []; // Create empty array for list (*3)
-                        }
+                } elseif (!is_null($this->shouldRemoveListElement($key))) {
+                    if (!empty($value)) {
+                        $soapResult->$key = [$soapResult->$key];    // Create array for list (*3)
+                    } else {
+                        $soapResult->$key = []; // Create empty array for list (*3)
                     }
                 }
             }
@@ -321,21 +322,22 @@ abstract class ClientBase {
     }
 
     /**
-     * isListIdentifier
-     * Is this identifier in the known list identifiers ?
+     * shouldRemoveListElement
+     * Get the list identifier 
      * 
      * @param mixed $identifier     Identifier property / key
-     * @return bool True if in the list, false if not
+     * @return optional bool True if list element should be removed, 
+     * false if not, null if not a list element.
      */
-    private function isListIdentifier($identifier): bool {
+    private function shouldRemoveListElement($identifier): ?bool {
         if (is_string($identifier)) {
-            foreach (self::FILTER_LIST_IDENTIFIERS as $listIdentifier) {
+            foreach (self::LIST_IDENTIFIERS as $listIdentifier => $removeElement) {
                 if (strpos($identifier, $listIdentifier) !== false) {
-                    return true;
+                    return $removeElement;
                 }
             }
         }
-        return false;
+        return null;
     }
 
     /**
