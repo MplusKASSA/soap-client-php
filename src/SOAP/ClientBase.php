@@ -26,7 +26,23 @@ abstract class ClientBase {
     protected float $timeout;
     protected ?string $soapFault = null;
 
-    private const FILTER_LIST_IDENTIFIERS = ['List', 'Ids', 'subAuthorizations', 'branches', 'workplaces', 'branchNumbers', 'subGroups'];
+    private const FILTER_LIST_IDENTIFIERS = [
+        'List',
+        'Ids',
+        'Authorizations',
+        'branches',
+        'workplaces',
+        'Numbers',
+        'Groups',
+        'Addresses',
+        'Tables',
+        'Barcodes',
+        'Stocks',
+        'History',
+        'values',
+        'availableValues',
+        'entries',
+    ];
 
     /**
      * construct
