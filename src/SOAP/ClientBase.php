@@ -195,7 +195,6 @@ abstract class ClientBase {
                 } else {
                     foreach ($requestArray as $key => $value) {
                         if (is_array($value) && (is_array(reset($value)) && is_string(array_key_first(reset($value))) || is_string(array_key_first($value)))) {
-                            echo "\nDees : ".print_r($value, true)."\n";
                             $requestElement = $dom->createElement('ns1:' . $key);
                             $methodElement->appendChild($requestElement);
                             $this->addRequestArray($dom, $requestElement, $value);
