@@ -48,6 +48,8 @@ abstract class ClientBase {
         'availableValues' => false,
         'entries' => false,
         'purchaseDeliveryNumbers' => true,
+        'variants' => true,
+        'packaging'=> true,
     ];
 
     /**
